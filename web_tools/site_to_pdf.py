@@ -8,6 +8,7 @@ from playwright.async_api import async_playwright
 from tqdm.asyncio import tqdm
 
 
+
 async def crawl_website(start_url: str, max_depth: int) -> bytes:
     """Crawl links starting from ``start_url`` up to ``max_depth`` and
     return a single PDF combining all visited pages."""
@@ -18,6 +19,7 @@ async def crawl_website(start_url: str, max_depth: int) -> bytes:
     async with async_playwright() as p:
         browser = await p.chromium.launch()
         progress = tqdm(total=0, unit="page", dynamic_ncols=True)
+
         while queue:
             url, depth = queue.pop(0)
             if url in visited or depth > max_depth:
@@ -30,6 +32,7 @@ async def crawl_website(start_url: str, max_depth: int) -> bytes:
                 merger.append(BytesIO(pdf_bytes))
                 progress.set_description(f"Depth {depth}")
                 progress.update(1)
+
                 if depth < max_depth:
                     hrefs = await page.eval_on_selector_all(
                         "a[href]",
@@ -49,6 +52,7 @@ async def crawl_website(start_url: str, max_depth: int) -> bytes:
             finally:
                 await page.close()
         progress.close()
+
         await browser.close()
 
     output = BytesIO()
@@ -66,6 +70,7 @@ async def save_website_pdf(url: str, depth: int, output_path: str) -> None:
 def main() -> None:
     import argparse
     import sys
+
 
     parser = argparse.ArgumentParser(
         description="Crawl a website and save pages as a single PDF."
