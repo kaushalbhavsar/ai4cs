@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PDF Assistant</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    #chat { max-width: 600px; margin: 20px auto; }
+    .message { padding: 10px; margin-bottom: 5px; border-radius: 5px; }
+    .user { background: #eef; }
+    .bot { background: #efe; }
+  </style>
+</head>
+<body>
+<div id="chat">
+  <div id="messages"></div>
+  <form id="question-form">
+    <input type="text" id="question" placeholder="Ask a question" size="60" required>
+    <button type="submit">Send</button>
+  </form>
+</div>
+<script>
+async function sendQuestion(question) {
+  const res = await fetch('/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question })
+  });
+  const data = await res.json();
+  return data.answer;
+}
+
+document.getElementById('question-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const qInput = document.getElementById('question');
+  const question = qInput.value;
+  qInput.value = '';
+  const messages = document.getElementById('messages');
+  messages.innerHTML += `<div class="message user">${question}</div>`;
+  const answer = await sendQuestion(question);
+  messages.innerHTML += `<div class="message bot">${answer}</div>`;
+});
+</script>
+</body>
+</html>
