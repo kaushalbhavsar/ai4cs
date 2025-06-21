@@ -60,6 +60,7 @@ async def save_website_pdf(url: str, depth: int, output_path: str) -> None:
 
 def main() -> None:
     import argparse
+    import sys
 
     parser = argparse.ArgumentParser(
         description="Crawl a website and save pages as a single PDF."
@@ -69,6 +70,9 @@ def main() -> None:
     parser.add_argument(
         "output", nargs="?", default="site.pdf", help="Output PDF file"
     )
+    if len(sys.argv) == 1:
+        parser.print_help()
+        return
     args = parser.parse_args()
 
     asyncio.run(save_website_pdf(args.url, args.depth, args.output))
