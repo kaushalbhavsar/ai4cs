@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Interactive Follow-up Bot</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f7f7f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  #chat {
+    width: 450px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+  }
+  #messages {
+    min-height: 200px;
+    margin-bottom: 10px;
+  }
+  .message {
+    margin-bottom: 8px;
+  }
+  .bot {
+    color: #333;
+  }
+  .user {
+    text-align: right;
+    color: #005b96;
+  }
+  .buttons button {
+    margin-right: 5px;
+    margin-bottom: 5px;
+  }
+</style>
+</head>
+<body>
+<div id="chat">
+  <div id="messages"></div>
+  <div class="buttons" id="buttons"></div>
+  <form id="form">
+    <input type="text" id="input" autocomplete="off" placeholder="Type your answer" required style="width:80%" />
+    <button>Send</button>
+  </form>
+</div>
+<script>
+const messages = document.getElementById('messages');
+const buttonsDiv = document.getElementById('buttons');
+const form = document.getElementById('form');
+const input = document.getElementById('input');
+
+function addMessage(text, cls) {
+  const div = document.createElement('div');
+  div.className = 'message ' + cls;
+  div.textContent = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function addButtons(options) {
+  buttonsDiv.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = opt.text;
+    btn.addEventListener('click', () => {
+      input.value = opt.text;
+      form.dispatchEvent(new Event('submit'));
+    });
+    buttonsDiv.appendChild(btn);
+  });
+}
+
+let step = 0;
+addMessage("Hi there! What's your name?", 'bot');
+
+function nextQuestion(answer) {
+  if (step === 0) {
+    step = 1;
+    addMessage(`Nice to meet you, ${answer}! How old are you?`, 'bot');
+  } else if (step === 1) {
+    step = 2;
+    addMessage('What is your gender?', 'bot');
+  } else if (step === 2) {
+    step = 3;
+    addMessage('Are you a student or a working professional?', 'bot');
+  } else {
+    if (/student/i.test(answer)) {
+      addMessage('Great! Here are some follow-up questions:', 'bot');
+      addButtons([
+        { text: 'What are you studying?' },
+        { text: 'What year are you in?' }
+      ]);
+    } else if (/work|professional/i.test(answer)) {
+      addMessage('Great! Here are some follow-up questions:', 'bot');
+      addButtons([
+        { text: 'What field do you work in?' },
+        { text: 'What do you enjoy most about your job?' }
+      ]);
+    } else {
+      addButtons([]);
+    }
+  }
+}
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const text = input.value.trim();
+  if (!text) return;
+  addMessage(text, 'user');
+  input.value = '';
+  buttonsDiv.innerHTML = '';
+  nextQuestion(text);
+});
+</script>
+</body>
+</html>
