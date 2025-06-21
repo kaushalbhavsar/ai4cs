@@ -9,32 +9,59 @@
       background: #f5f5f5;
       display: flex;
       justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
     #chat {
-      width: 600px;
-      margin-top: 50px;
+      width: 420px;
       background: #fff;
       border: 1px solid #ccc;
       border-radius: 8px;
       padding: 20px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
     }
     #messages {
-      max-height: 400px;
+      flex: 1;
       overflow-y: auto;
       margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
     }
     .message {
-      padding: 10px;
+      max-width: 80%;
+      padding: 8px 12px;
       margin-bottom: 8px;
-      border-radius: 5px;
+      border-radius: 18px;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
     }
     .user {
-      background: #e0f0ff;
-      text-align: right;
+      background: #0084ff;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
     }
     .bot {
-      background: #f0ffe0;
+      background: #e5e5ea;
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+    }
+    @keyframes blink {
+      0% { opacity: 0.2; }
+      20% { opacity: 1; }
+      100% { opacity: 0.2; }
+    }
+    .typing {
+      font-style: italic;
+      opacity: 0.7;
+    }
+    .typing::after {
+      content: '...';
+      animation: blink 1s infinite steps(3, end);
     }
     #remaining {
       font-size: 0.9em;
@@ -72,6 +99,11 @@
 </div>
 <script>
 let remaining = 7;
+function scrollToBottom() {
+  const messages = document.getElementById('messages');
+  messages.scrollTop = messages.scrollHeight;
+}
+
 async function sendQuestion(question) {
   const res = await fetch('/ask', {
     method: 'POST',
@@ -92,21 +124,38 @@ document.getElementById('question-form').addEventListener('submit', async (e) =>
   const question = qInput.value.trim();
   if (!question) return;
   qInput.value = '';
+  qInput.focus();
   const messages = document.getElementById('messages');
   const errorDiv = document.getElementById('error');
   errorDiv.textContent = '';
-  messages.innerHTML += `<div class="message user">${question}</div>`;
+
+  const userDiv = document.createElement('div');
+  userDiv.className = 'message user';
+  userDiv.textContent = question;
+  messages.appendChild(userDiv);
+  scrollToBottom();
+
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'message bot typing';
+  typingDiv.textContent = 'Bot is typing';
+  messages.appendChild(typingDiv);
+  scrollToBottom();
+
   try {
     const answer = await sendQuestion(question);
-    messages.innerHTML += `<div class="message bot">${answer}</div>`;
+    typingDiv.textContent = answer;
+    typingDiv.classList.remove('typing');
     document.getElementById('remaining').textContent = `Questions left: ${remaining}`;
     if (remaining <= 0) {
       qInput.disabled = true;
       errorDiv.textContent = 'Question limit reached';
     }
   } catch (err) {
+    messages.removeChild(typingDiv);
     errorDiv.textContent = err.message;
   }
+  scrollToBottom();
+  if (!qInput.disabled) qInput.focus();
 });
 </script>
 </body>
