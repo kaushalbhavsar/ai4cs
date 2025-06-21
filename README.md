@@ -24,3 +24,9 @@ python -m pdf_bot.app
 ```
 
 The app will be available on `http://localhost:5000` and can be embedded in an `<iframe>`.
+
+## UI Features
+
+The chat interface mimics a messenger-style layout. It automatically scrolls to
+the latest message and displays a typing indicator while the bot is generating a
+response.
