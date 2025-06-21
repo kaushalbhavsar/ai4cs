@@ -5,6 +5,8 @@ from urllib.parse import urljoin, urlparse
 
 from PyPDF2 import PdfMerger
 from playwright.async_api import async_playwright
+from tqdm.asyncio import tqdm
+
 
 
 async def crawl_website(start_url: str, max_depth: int) -> bytes:
@@ -16,6 +18,8 @@ async def crawl_website(start_url: str, max_depth: int) -> bytes:
 
     async with async_playwright() as p:
         browser = await p.chromium.launch()
+        progress = tqdm(total=0, unit="page", dynamic_ncols=True)
+
         while queue:
             url, depth = queue.pop(0)
             if url in visited or depth > max_depth:
@@ -26,6 +30,9 @@ async def crawl_website(start_url: str, max_depth: int) -> bytes:
                 await page.goto(url, wait_until="networkidle")
                 pdf_bytes = await page.pdf(print_background=True)
                 merger.append(BytesIO(pdf_bytes))
+                progress.set_description(f"Depth {depth}")
+                progress.update(1)
+
                 if depth < max_depth:
                     hrefs = await page.eval_on_selector_all(
                         "a[href]",
@@ -44,6 +51,8 @@ async def crawl_website(start_url: str, max_depth: int) -> bytes:
                 print(f"Failed to process {url}: {exc}")
             finally:
                 await page.close()
+        progress.close()
+
         await browser.close()
 
     output = BytesIO()
@@ -60,6 +69,8 @@ async def save_website_pdf(url: str, depth: int, output_path: str) -> None:
 
 def main() -> None:
     import argparse
+    import sys
+
 
     parser = argparse.ArgumentParser(
         description="Crawl a website and save pages as a single PDF."
@@ -69,6 +80,9 @@ def main() -> None:
     parser.add_argument(
         "output", nargs="?", default="site.pdf", help="Output PDF file"
     )
+    if len(sys.argv) == 1:
+        parser.print_help()
+        return
     args = parser.parse_args()
 
     asyncio.run(save_website_pdf(args.url, args.depth, args.output))
