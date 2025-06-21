@@ -2,3 +2,5 @@ flask
 openai
 PyPDF2
 faiss-cpu
+playwright
+tqdm
