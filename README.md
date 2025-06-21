@@ -1,6 +1,12 @@
 # PDF Assistant Bot
 
 This project provides a simple Flask web app that loads PDF files, indexes them using OpenAI embeddings and FAISS, and answers user questions. The web UI can be embedded in another site via an iframe. Each user session can ask up to seven questions.
+## UI Features
+
+- Messenger-style chat interface
+- Automatically scrolls to the newest message
+- Shows a "typing..." indicator while the bot responds
+
 ## Setup
 
 1. Install dependencies:
