@@ -4,15 +4,66 @@
   <meta charset="utf-8">
   <title>PDF Assistant</title>
   <style>
-    body { font-family: Arial, sans-serif; }
-    #chat { max-width: 600px; margin: 20px auto; }
-    .message { padding: 10px; margin-bottom: 5px; border-radius: 5px; }
-    .user { background: #eef; }
-    .bot { background: #efe; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+    }
+    #chat {
+      width: 600px;
+      margin-top: 50px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #messages {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .message {
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+    }
+    .user {
+      background: #e0f0ff;
+      text-align: right;
+    }
+    .bot {
+      background: #f0ffe0;
+    }
+    #remaining {
+      font-size: 0.9em;
+      color: #666;
+      text-align: right;
+      margin-bottom: 10px;
+    }
+    #error {
+      color: red;
+      margin-bottom: 10px;
+    }
+    #question-form {
+      display: flex;
+    }
+    #question {
+      flex: 1;
+      padding: 8px;
+      font-size: 1em;
+    }
+    button {
+      padding: 8px 12px;
+      font-size: 1em;
+    }
   </style>
 </head>
 <body>
 <div id="chat">
+  <div id="remaining">Questions left: 7</div>
+  <div id="error"></div>
   <div id="messages"></div>
   <form id="question-form">
     <input type="text" id="question" placeholder="Ask a question" size="60" required>
@@ -20,6 +71,7 @@
   </form>
 </div>
 <script>
+let remaining = 7;
 async function sendQuestion(question) {
   const res = await fetch('/ask', {
     method: 'POST',
@@ -27,18 +79,34 @@ async function sendQuestion(question) {
     body: JSON.stringify({ question })
   });
   const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Error');
+  }
+  remaining = data.remaining;
   return data.answer;
 }
 
 document.getElementById('question-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const qInput = document.getElementById('question');
-  const question = qInput.value;
+  const question = qInput.value.trim();
+  if (!question) return;
   qInput.value = '';
   const messages = document.getElementById('messages');
+  const errorDiv = document.getElementById('error');
+  errorDiv.textContent = '';
   messages.innerHTML += `<div class="message user">${question}</div>`;
-  const answer = await sendQuestion(question);
-  messages.innerHTML += `<div class="message bot">${answer}</div>`;
+  try {
+    const answer = await sendQuestion(question);
+    messages.innerHTML += `<div class="message bot">${answer}</div>`;
+    document.getElementById('remaining').textContent = `Questions left: ${remaining}`;
+    if (remaining <= 0) {
+      qInput.disabled = true;
+      errorDiv.textContent = 'Question limit reached';
+    }
+  } catch (err) {
+    errorDiv.textContent = err.message;
+  }
 });
 </script>
 </body>

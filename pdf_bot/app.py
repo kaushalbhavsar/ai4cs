@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session
 import openai
 
 from .pdf_processor import PdfVectorIndex
@@ -8,6 +8,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PDF_DIR = os.getenv("PDF_DIR", "pdfs")
 
 app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "please-change-me")
 vector_index = PdfVectorIndex(OPENAI_API_KEY)
 vector_index.build_index(PDF_DIR)
 
@@ -34,8 +35,13 @@ def ask():
     question = data.get("question", "")
     if not question:
         return jsonify({"error": "Question is required"}), 400
+    count = session.get("question_count", 0)
+    if count >= 7:
+        return jsonify({"error": "Question limit reached"}), 429
+    session["question_count"] = count + 1
     answer = generate_answer(question)
-    return jsonify({"answer": answer})
+    remaining = 7 - session["question_count"]
+    return jsonify({"answer": answer, "remaining": remaining})
 
 
 if __name__ == "__main__":
