@@ -6,10 +6,12 @@ from .pdf_processor import PdfVectorIndex
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PDF_DIR = os.getenv("PDF_DIR", "pdfs")
+INDEX_PATH = os.getenv("INDEX_PATH", "index.faiss")
+CHUNKS_PATH = os.getenv("CHUNKS_PATH", "chunks.json")
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "please-change-me")
-vector_index = PdfVectorIndex(OPENAI_API_KEY)
+vector_index = PdfVectorIndex(OPENAI_API_KEY, INDEX_PATH, CHUNKS_PATH)
 vector_index.build_index(PDF_DIR)
 
 
@@ -42,6 +44,22 @@ def ask():
     answer = generate_answer(question)
     remaining = 7 - session["question_count"]
     return jsonify({"answer": answer, "remaining": remaining})
+
+
+@app.route("/upload", methods=["POST"])
+def upload_pdf():
+    if "file" not in request.files:
+        return jsonify({"error": "No file"}), 400
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+    if not file.filename.lower().endswith(".pdf"):
+        return jsonify({"error": "Invalid file type"}), 400
+    os.makedirs(PDF_DIR, exist_ok=True)
+    path = os.path.join(PDF_DIR, file.filename)
+    file.save(path)
+    vector_index.add_pdfs([path])
+    return jsonify({"status": "uploaded"})
 
 
 if __name__ == "__main__":
