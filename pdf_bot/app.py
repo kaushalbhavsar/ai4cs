@@ -36,6 +36,12 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/widget")
+def widget():
+    """Return minimal chat UI for embedding."""
+    return render_template("widget.html")
+
+
 @app.route("/ask", methods=["POST"])
 def ask():
     data = request.get_json()
