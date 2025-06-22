@@ -31,6 +31,14 @@ python -m pdf_bot.app
 
 The app will be available on `http://localhost:5000` and can be embedded in an `<iframe>`.
 
+### Embedding Example
+
+To embed the chat widget on another website, point an `<iframe>` to the `/widget` route of your running server:
+
+```html
+<iframe src="http://localhost:5000/widget" width="420" height="600" style="border:0"></iframe>
+```
+
 The FAISS index and text chunks are saved to `index.faiss` and `chunks.json` by default so embeddings persist across restarts. Use the `INDEX_PATH` and `CHUNKS_PATH` environment variables to change these locations.
 
 You can upload new PDF files through the web interface or by sending a `POST` request with a `file` field to `/upload`. Uploaded PDFs are immediately indexed and saved.
