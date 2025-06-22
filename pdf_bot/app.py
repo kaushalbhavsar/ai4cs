@@ -17,7 +17,12 @@ vector_index.build_index(PDF_DIR)
 
 def generate_answer(question: str) -> str:
     contexts = vector_index.query(question)
-    prompt = "Answer the question using the context below.\n\n" + "\n\n".join(contexts) + f"\n\nQuestion: {question}\nAnswer:"
+    prompt = (
+        "Answer the user's question using only the following information. "
+        "If the answer isn't present, reply that you do not have that information "
+        "without referencing the word 'context'. "
+        "When mentioning the organization, refer to it as 'we' instead of using its name.\n\n"
+    ) + "\n\n".join(contexts) + f"\n\nQuestion: {question}\nAnswer:"
     response = openai.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
