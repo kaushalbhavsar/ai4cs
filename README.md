@@ -41,8 +41,6 @@ To embed the chat widget on another website, point an `<iframe>` to the `/widget
 
 The FAISS index and text chunks are saved to `index.faiss` and `chunks.json` by default so embeddings persist across restarts. Use the `INDEX_PATH` and `CHUNKS_PATH` environment variables to change these locations.
 
-You can upload new PDF files through the web interface or by sending a `POST` request with a `file` field to `/upload`. Uploaded PDFs are immediately indexed and saved.
-
 ## UI Features
 
 The chat interface mimics a messenger-style layout. It automatically scrolls to
