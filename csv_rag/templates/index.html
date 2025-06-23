@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>CSV Assistant</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #chat {
+      width: 420px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+    }
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    .message {
+      max-width: 80%;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border-radius: 18px;
+      word-wrap: break-word;
+      overflow-wrap: anywhere;
+    }
+    .user {
+      background: #0084ff;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+    .bot {
+      background: #e5e5ea;
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+    }
+    @keyframes blink {
+      0% { opacity: 0.2; }
+      20% { opacity: 1; }
+      100% { opacity: 0.2; }
+    }
+    .typing {
+      font-style: italic;
+      opacity: 0.7;
+    }
+    .typing::after {
+      content: '...';
+      animation: blink 1s infinite steps(3, end);
+    }
+    #remaining {
+      font-size: 0.9em;
+      color: #666;
+      text-align: right;
+      margin-bottom: 10px;
+    }
+    #error {
+      color: red;
+      margin-bottom: 10px;
+    }
+    #question-form {
+      display: flex;
+    }
+    #question {
+      flex: 1;
+      padding: 8px;
+      font-size: 1em;
+    }
+    button {
+      padding: 8px 12px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+<div id="chat">
+  <div id="remaining">Questions left: 7</div>
+  <div id="error"></div>
+  <div id="messages"></div>
+  <form id="question-form">
+    <input type="text" id="question" placeholder="Ask about the vehicles" size="60" required>
+    <button type="submit">Send</button>
+  </form>
+</div>
+<script>
+let remaining = 7;
+function scrollToBottom() {
+  const messages = document.getElementById('messages');
+  messages.scrollTop = messages.scrollHeight;
+}
+async function sendQuestion(question) {
+  const res = await fetch('/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question })
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || 'Error');
+  }
+  remaining = data.remaining;
+  return data.answer;
+}
+
+document.getElementById('question-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const qInput = document.getElementById('question');
+  const question = qInput.value.trim();
+  if (!question) return;
+  qInput.value = '';
+  qInput.focus();
+  const messages = document.getElementById('messages');
+  const errorDiv = document.getElementById('error');
+  errorDiv.textContent = '';
+
+  const userDiv = document.createElement('div');
+  userDiv.className = 'message user';
+  userDiv.textContent = question;
+  messages.appendChild(userDiv);
+  scrollToBottom();
+
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'message bot typing';
+  typingDiv.textContent = 'Bot is typing';
+  messages.appendChild(typingDiv);
+  scrollToBottom();
+
+  try {
+    const answer = await sendQuestion(question);
+    typingDiv.textContent = answer;
+    typingDiv.classList.remove('typing');
+    document.getElementById('remaining').textContent = `Questions left: ${remaining}`;
+    if (remaining <= 0) {
+      qInput.disabled = true;
+      errorDiv.textContent = 'Question limit reached';
+    }
+  } catch (err) {
+    messages.removeChild(typingDiv);
+    errorDiv.textContent = err.message;
+  }
+  scrollToBottom();
+  if (!qInput.disabled) qInput.focus();
+});
+</script>
+</body>
+</html>
