@@ -1,0 +1,5 @@
+{
+  "USA-student": ["Passport", "DS-160 confirmation", "I-20 form", "SEVIS fee receipt", "Financial documents"],
+  "USA-tourist": ["Passport", "DS-160 confirmation", "Photo", "Bank statements", "Travel itinerary"],
+  "Canada-worker": ["Passport", "Job offer letter", "LMIA", "Photographs", "Proof of qualifications"]
+}
