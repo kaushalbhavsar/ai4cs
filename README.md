@@ -46,3 +46,15 @@ The FAISS index and text chunks are saved to `index.faiss` and `chunks.json` by 
 The chat interface mimics a messenger-style layout. It automatically scrolls to
 the latest message and displays a typing indicator while the bot is generating a
 response.
+
+## Visa Consultancy Bot
+
+`visa_bot` provides a minimal example of a chatbot for visa consultancies. It answers common questions from a small FAQ file, captures lead information, returns simple document checklists, and records appointment requests.
+
+### Running
+
+```bash
+python -m visa_bot.app
+```
+
+The default web interface is available on `http://localhost:5000`.
