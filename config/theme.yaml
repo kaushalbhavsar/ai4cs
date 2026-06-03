@@ -1,0 +1,11 @@
+theme:
+  background: "#0D1B2A"
+  primary: "#3A86FF"
+  accent: "#FFBE0B"
+  success: "#2ECC71"
+  danger: "#FF5C5C"
+  text: "#F8FAFC"
+  muted: "#9FB3C8"
+  font: "DejaVuSans"
+  brand: "InfoSecQuiz.com"
+  logo: "assets/logo.png"

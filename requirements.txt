@@ -1,6 +1,11 @@
-flask
-openai
-PyPDF2
 faiss-cpu
+flask
+Jinja2
+openai
+Pillow
 playwright
+PyPDF2
+pytest
+PyYAML
+requests
 tqdm
