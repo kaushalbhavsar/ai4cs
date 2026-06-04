@@ -1,0 +1,14 @@
+{
+  "id": 1001,
+  "category": "Insider Threat",
+  "difficulty": "Medium",
+  "question": "What is the employee most likely doing?",
+  "options": [
+    "Stealing confidential data",
+    "Working overtime legitimately",
+    "Running a system backup",
+    "Reporting a security incident"
+  ],
+  "correct_answer": "A",
+  "explanation": "Accessing HR records outside business hours may indicate unauthorized activity."
+}
